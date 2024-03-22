@@ -26720,15 +26720,15 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const { run, cleanup } = __nccwpck_require__(3561);
 
-const isPost = !!core.getState('isPost');
-if (!isPost) {
-  run();
-} else {
+const isPost = (process.argv.length == 3 &&process.argv[2] == 'post') ? true : false;
+if (isPost) {
   cleanup();
+}
+else {
+  run();
 }
 
 return 0
-
 })();
 
 module.exports = __webpack_exports__;
