@@ -76,7 +76,7 @@ Currently the below providers are supported, but it could be used with other pro
 
 - name: Interact with object storage
   run: |
-    s3cmd -c your-path/.s3cfg --exclude "dist/assets/*.css" sync --recursive --acl-public --delete-removed --delete-excluded --no-mime-magic --guess-mime-type ./dist/ s3://${{ env.BUCKET_NAME }}/
+    s3cmd -c your-path/.s3cfg --exclude "dist/assets/*.css" sync --recursive --acl-public --delete-removed --no-mime-magic --guess-mime-type ./dist/ s3://${{ env.BUCKET_NAME }}/
     s3cmd -c your-path/.s3cfg put ./dist/assets/*.css --mime-type="text/css" -f s3://${{ env.BUCKET_NAME }}/assets/
     s3cmd -c your-path/.s3cfg info s3://${{ env.BUCKET_NAME }}
 ```
