@@ -3,12 +3,13 @@ const homedir = require('os').homedir();
 const path = require('path');
 const { execSync } = require('child_process');
 const { createWriteStream } = require('fs')
-const { providers, makeConf } = require('./providers')
+const { providers, makeConf } = require('./providers');
+const fs = require('fs');
 
 const isPost = !!core.getState('isPost');
 if (!isPost) {
   // Main
-  execSync("/bin/bash -c 'pip3 install s3cmd --no-cache'");
+  execSync(`/bin/bash -c '[ -z "$(which s3cmd)" ] && pip3 install s3cmd --no-cache || echo "s3cmd is installed"'`);
 
   const conf = makeConf(providers[core.getInput('provider')]({
     region: core.getInput("region"),
@@ -28,7 +29,7 @@ if (!isPost) {
   const cleanup_config = core.getInput("cleanup_config") || "false";
   if (['1', "true", "yes"].indexOf(cleanup_config.toLowerCase()) >= 0) {
     let config_path = core.getInput("config_path") || path.join(homedir, '.s3cfg');
-    fs.unlink(config_path);
+    fs.rmSync(config_path);
   }
 }
 
