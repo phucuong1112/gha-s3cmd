@@ -20,6 +20,13 @@ inputs:
   secret_key:
     description: "s3 secret key"
     required: true
+  config_path:
+    description: "custom config path. Default is ~/.s3cfg"
+    required: false
+  cleanup_config:
+    description: "flag to clean config file. Default true"
+    default: "true"
+    required: false
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"

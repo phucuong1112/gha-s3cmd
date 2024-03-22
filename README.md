@@ -34,11 +34,21 @@ Currently the below providers are supported, but it could be used with other pro
 
 **Not Required** Cloudflare account ID. Only required when using Cloudflare R2.
 
+### `config_path`
+
+**Not Required** Custom config path. Default is ~/.s3cfg.
+
+### `cleanup_config`
+
+**Not Required** Option to clean up config file. Default is true.
+
 ## Example usage
+
+- Upload to s3
 
 ```yml
 - name: Set up S3cmd cli tool
-  uses: s3-actions/s3cmd@v1.5.0
+  uses: phucuong1112/gha-s3cmd@v1.1.0
   with:
     provider: aws # default is linode
     region: 'eu-central-1'
@@ -50,6 +60,25 @@ Currently the below providers are supported, but it could be used with other pro
     s3cmd sync --recursive --acl-public dist s3://awesome.blog/
     s3cmd put dist/style.css --mime-type 'text/css' --acl-public s3://awesome.blog/style.css
     s3cmd info s3://awesome.blog
+```
+
+- Upload to r2 with custom config path
+
+```yml
+- name: Set up S3cmd cli tool
+  uses: phucuong1112/gha-s3cmd@v1.1.0
+  with:
+    provider: cloudflare
+    region: 'eu-central-1'
+    access_key: ${{ secrets.S3_ACCESS_KEY }}
+    secret_key: ${{ secrets.S3_SECRET_KEY }}
+    config_path: your-path/.s3cfg
+
+- name: Interact with object storage
+  run: |
+    s3cmd -c your-path/.s3cfg --exclude "dist/assets/*.css" sync --recursive --acl-public --delete-removed --delete-excluded --no-mime-magic --guess-mime-type ./dist/ s3://${{ env.BUCKET_NAME }}/
+    s3cmd -c your-path/.s3cfg put ./dist/assets/*.css --mime-type="text/css" -f s3://${{ env.BUCKET_NAME }}/assets/
+    s3cmd -c your-path/.s3cfg info s3://${{ env.BUCKET_NAME }}
 ```
 
 ### Note
