@@ -24701,68 +24701,6 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ 8842:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const defaults = __nccwpck_require__(724)
-
-const providers = {
-  aws: ({ region = 'US', access_key = '', secret_key = ''}) => ({
-    bucket_location: region,
-    host_base: 's3.amazonaws.com',
-    host_bucket: '%(bucket)s.s3.amazonaws.com',
-    website_endpoint: 'http://%(bucket)s.s3-website-%(location)s.amazonaws.com/',
-    access_key,
-    secret_key,
-  }),
-  digitalocean: ({ region = 'nyc3', access_key = '', secret_key = ''}) => ({
-    bucket_location: region,
-    host_base: `${region}.digitaloceanspaces.com`,
-    host_bucket: `%(bucket)s.${region}.digitaloceanspaces.com`,
-    website_endpoint: `http://%(bucket)s.website-${region}.digitaloceanspaces.com`,
-    access_key,
-    secret_key,
-  }),
-  linode: ({ region = 'eu-central-1', access_key = '', secret_key = '' }) => ({
-    bucket_location: 'US',
-    host_base: `${region}.linodeobjects.com`,
-    host_bucket: `%(bucket)s.${region}.linodeobjects.com`,
-    website_endpoint: `http://%(bucket)s.website-${region}.linodeobjects.com/`,
-    access_key,
-    secret_key,
-  }),
-  scaleway: ({ region = 'fr-par', access_key = '', secret_key = '' }) => ({
-    bucket_location: region,
-    host_base: `s3.${region}.scw.cloud`,
-    host_bucket: `%(bucket)s.s3.${region}.scw.cloud`,
-    website_endpoint: `https://%(bucket)s.s3-website.${region}.scw.cloud/`,
-    access_key,
-    secret_key,
-  }),
-  cloudflare: ({ account_id = '', region='auto', access_key = '', secret_key = '' }) => ({
-    bucket_location: region,
-    host_base: `${account_id}.r2.cloudflarestorage.com`,
-    host_bucket: '',
-    website_endpoint: '',
-    access_key,
-    secret_key,
-  })
-}
-
-const makeConf = (provider) => {
-  const opts = { ...defaults, ...provider }
-  return Object.entries(opts).map(([k, v]) => `${k} = ${v}`)
-}
-
-module.exports = {
-  providers,
-  makeConf
-}
-
-
-
-/***/ }),
-
 /***/ 9491:
 /***/ ((module) => {
 
@@ -24784,14 +24722,6 @@ module.exports = require("async_hooks");
 
 "use strict";
 module.exports = require("buffer");
-
-/***/ }),
-
-/***/ 2081:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("child_process");
 
 /***/ }),
 
@@ -26618,14 +26548,6 @@ function parseParams (str) {
 module.exports = parseParams
 
 
-/***/ }),
-
-/***/ 724:
-/***/ ((module) => {
-
-"use strict";
-module.exports = JSON.parse('{"access_key":"","access_token":"","add_encoding_exts":"","add_headers":"","bucket_location":"US","ca_certs_file":"","cache_file":"","check_ssl_certificate":"True","check_ssl_hostname":"True","cloudfront_host":"cloudfront.amazonaws.com","connection_pooling":"True","content_disposition":"","content_type":"","default_mime_type":"binary/octet-stream","delay_updates":"False","delete_after":"False","delete_after_fetch":"False","delete_removed":"False","dry_run":"False","enable_multipart":"True","encoding":"UTF-8","encrypt":"False","expiry_date":"","expiry_days":"","expiry_prefix":"","follow_symlinks":"False","force":"False","get_continue":"False","gpg_command":"/usr/bin/gpg","gpg_decrypt":"%(gpg_command)s -d --verbose --no-use-agent --batch --yes --passphrase-fd %(passphrase_fd)s -o %(output_file)s %(input_file)s","gpg_encrypt":"%(gpg_command)s -c --verbose --no-use-agent --batch --yes --passphrase-fd %(passphrase_fd)s -o %(output_file)s %(input_file)s","gpg_passphrase":"","guess_mime_type":"True","host_base":"s3.amazonaws.com","host_bucket":"%(bucket)s.s3.amazonaws.com","human_readable_sizes":"False","invalidate_default_index_on_cf":"False","invalidate_default_index_root_on_cf":"True","invalidate_on_cf":"False","kms_key":"","limit":"-1","limitrate":"0","list_md5":"False","log_target_prefix":"","long_listing":"False","max_delete":"-1","mime_type":"","multipart_chunk_size_mb":"15","multipart_max_chunks":"10000","preserve_attrs":"True","progress_meter":"True","proxy_host":"","proxy_port":"0","public_url_use_https":"False","put_continue":"False","recursive":"False","recv_chunk":"65536","reduced_redundancy":"False","requester_pays":"False","restore_days":"1","restore_priority":"Standard","secret_key":"","send_chunk":"65536","server_side_encryption":"False","signature_v2":"False","signurl_use_https":"False","simpledb_host":"sdb.amazonaws.com","skip_existing":"False","socket_timeout":"300","stats":"False","stop_on_error":"False","storage_class":"","throttle_max":"100","upload_id":"","urlencoding_mode":"normal","use_http_expect":"False","use_https":"True","use_mime_magic":"True","verbosity":"WARNING","website_endpoint":"http://%(bucket)s.s3-website-%(location)s.amazonaws.com/","website_error":"","website_index":"index.html"}');
-
 /***/ })
 
 /******/ 	});
@@ -26672,26 +26594,14 @@ var __webpack_exports__ = {};
 const core = __nccwpck_require__(2186);
 const homedir = (__nccwpck_require__(2037).homedir)();
 const path = __nccwpck_require__(1017);
-const { execSync } = __nccwpck_require__(2081);
-const { createWriteStream } = __nccwpck_require__(7147)
-const { providers, makeConf } = __nccwpck_require__(8842);
 const fs = __nccwpck_require__(7147);
 
-execSync(`/bin/bash -c '[ -z "$(which s3cmd)" ] && pip3 install s3cmd --no-cache || echo "s3cmd is installed"'`);
-
-const conf = makeConf(providers[core.getInput('provider')]({
-  region: core.getInput("region"),
-  account_id: core.getInput("account_id"),
-  access_key: core.getInput("access_key"),
-  secret_key: core.getInput("secret_key"),
-}))
-
-let config_path = core.getInput("config_path") || path.join(homedir, '.s3cfg');
-core.info(`* Setup file ${config_path}`);
-const writer = createWriteStream(config_path)
-
-for (const line of conf) {
-  writer.write(line + '\r\n')
+const cleanup_config = core.getInput("cleanup_config") || "false";
+core.info(`* Clean up file ${cleanup_config}`);
+if (['1', "true", "yes"].indexOf(cleanup_config.toLowerCase()) >= 0) {
+  let config_path = core.getInput("config_path") || path.join(homedir, '.s3cfg');
+  fs.rmSync(config_path);
+  core.info(`- ${cleanup_config} is deleted`);
 }
 
 return 0
