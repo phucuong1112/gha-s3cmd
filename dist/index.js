@@ -24701,6 +24701,51 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 3561:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(2186);
+const homedir = (__nccwpck_require__(2037).homedir)();
+const path = __nccwpck_require__(1017);
+const { execSync } = __nccwpck_require__(2081);
+const { createWriteStream } = __nccwpck_require__(7147)
+const { providers, makeConf } = __nccwpck_require__(8842);
+const fs = __nccwpck_require__(7147);
+
+function run() {
+  // Main
+  execSync(`/bin/bash -c '[ -z "$(which s3cmd)" ] && pip3 install s3cmd --no-cache || echo "s3cmd is installed"'`);
+
+  const conf = makeConf(providers[core.getInput('provider')]({
+    region: core.getInput("region"),
+    account_id: core.getInput("account_id"),
+    access_key: core.getInput("access_key"),
+    secret_key: core.getInput("secret_key"),
+  }))
+  
+  let config_path = core.getInput("config_path") || path.join(homedir, '.s3cfg');
+  const writer = createWriteStream(config_path)
+  
+  for (const line of conf) {
+    writer.write(line + '\r\n')
+  }
+}
+
+function cleanup() {
+  const cleanup_config = core.getInput("cleanup_config") || "false";
+  if (['1', "true", "yes"].indexOf(cleanup_config.toLowerCase()) >= 0) {
+    let config_path = core.getInput("config_path") || path.join(homedir, '.s3cfg');
+    fs.rmSync(config_path);
+  }
+}
+
+module.exports = {
+  run,
+  cleanup
+}
+
+/***/ }),
+
 /***/ 8842:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -26670,37 +26715,13 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(2186);
-const homedir = (__nccwpck_require__(2037).homedir)();
-const path = __nccwpck_require__(1017);
-const { execSync } = __nccwpck_require__(2081);
-const { createWriteStream } = __nccwpck_require__(7147)
-const { providers, makeConf } = __nccwpck_require__(8842)
+const { run, cleanup } = __nccwpck_require__(3561);
 
 const isPost = !!core.getState('isPost');
 if (!isPost) {
-  // Main
-  execSync("/bin/bash -c 'pip3 install s3cmd --no-cache'");
-
-  const conf = makeConf(providers[core.getInput('provider')]({
-    region: core.getInput("region"),
-    account_id: core.getInput("account_id"),
-    access_key: core.getInput("access_key"),
-    secret_key: core.getInput("secret_key"),
-  }))
-  
-  let config_path = core.getInput("config_path") || path.join(homedir, '.s3cfg');
-  const writer = createWriteStream(config_path)
-  
-  for (const line of conf) {
-    writer.write(line + '\r\n')
-  }
+  run();
 } else {
-  // Post
-  const cleanup_config = core.getInput("cleanup_config") || "false";
-  if (['1', "true", "yes"].indexOf(cleanup_config.toLowerCase()) >= 0) {
-    let config_path = core.getInput("config_path") || path.join(homedir, '.s3cfg');
-    fs.unlink(config_path);
-  }
+  cleanup();
 }
 
 return 0
